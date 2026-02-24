@@ -5,6 +5,7 @@ import { ChatPage } from "./ChatPage";
 
 function App() {
   const [isVisible, setIsVisible] = useState(true);
+  // const [content, setContent] = useState("");
   return (
     <div className="App">
       {/* <header className="App-header"></header> */}
@@ -16,7 +17,11 @@ function App() {
       {isVisible ? (
         <StartPage setIsVisible={setIsVisible} />
       ) : (
-        <ChatPage setIsVisible={setIsVisible} />
+        <ChatPage
+          setIsVisible={setIsVisible}
+          // content={content}
+          // setContent={setContent}
+        />
       )}
     </div>
   );
