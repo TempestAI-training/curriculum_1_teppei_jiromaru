@@ -46,11 +46,20 @@ export const ChatPage = ({
             width: 300,
           }}
         >
-          <div>
-            {messages.map((el, index) => (
-              <div key={index}>{el.text}</div>
-            ))}
+          <div
+            style={{
+              height: "300px",
+              overflowY: "auto",
+              border: "1px solid #aaaaaa",
+            }}
+          >
+            <div>
+              {messages.map((el, index) => (
+                <div key={index}>{el.text}</div>
+              ))}
+            </div>
           </div>
+
           <label>
             chat
             <textarea
