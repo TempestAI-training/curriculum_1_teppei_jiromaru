@@ -1,4 +1,4 @@
-.env
+backend/.env
 backend/__pychache__/
 backend/pytest_cache/
 .venv/

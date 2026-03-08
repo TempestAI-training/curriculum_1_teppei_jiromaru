@@ -14,6 +14,7 @@ app = FastAPI()
 # APIキーは環境変数から自動的に読み込まれますが、明示的に渡すことも可能です
 client = OpenAI(
     api_key=os.environ.get("OPENAI_API_KEY"),
+    base_url=os.environ.get("OPENAI_BASE_URL"),
 )
 
 # リクエストボディの定義（ユーザーから送られてくるデータの型）
