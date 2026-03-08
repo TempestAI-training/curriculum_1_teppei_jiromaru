@@ -16,6 +16,9 @@ from openai import AzureOpenAI
 # docker-composeを使わないローカル実行時のために読み込む
 from dotenv import load_dotenv
 
+#corsの設定
+from fastapi.middleware.cors import CORSMiddleware
+
 # === ここから追加： 通信の裏側をログに出力する設定 ===
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("httpx").setLevel(logging.DEBUG)
@@ -25,6 +28,17 @@ logging.getLogger("httpx").setLevel(logging.DEBUG)
 load_dotenv()
 
 app = FastAPI()
+
+# ----------
+# corsの設定
+app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:3000"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+        )
+# ----------
 
 # OpenAIクライアントの初期化
 # APIキーは環境変数から自動的に読み込まれますが、明示的に渡すことも可能です

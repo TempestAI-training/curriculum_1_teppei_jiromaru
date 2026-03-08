@@ -18,18 +18,37 @@ export const ChatPage = ({
 }: ChatPageProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const send = () => {
+  const send = async () => {
     if (!input) {
       return;
     }
+    // user
     const userMessage: Message = { text: input, sender: "user" };
-    const botMessage: Message = {
-      text: "高市さんは日本の総理大臣です。",
-      sender: "bot",
-    };
     setMessages((prev) => [...prev, userMessage]);
-    setMessages((prev) => [...prev, botMessage]);
+    const currentInput = input;
     setInput("");
+    // bot
+    try {
+      const response = await fetch("http://localhost:8000/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // FastAPI側の ChatRequest が期待している {"message": "..."} の形にする
+        body: JSON.stringify({ message: currentInput }),
+      });
+      //backendからのレスポンス
+      const data = await response.json();
+      // main.pyではreturn {"reply": ai_message}としているので、data.replyでアクセスできる
+
+      const botMessage: Message = {
+        text: data.reply,
+        sender: "bot",
+      };
+      setMessages((prev) => [...prev, botMessage]);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
