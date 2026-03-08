@@ -48,6 +48,11 @@ export const ChatPage = ({
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       console.error(error);
+      const errorMessage: Message = {
+        text: "===a communication error has occured===",
+        sender: "bot",
+      };
+      setMessages((prev) => [...prev, errorMessage]);
     }
   };
 

@@ -53,7 +53,7 @@ class ChatRequest(BaseModel):
     message: str
 #schemasへ
 
-@app.post("/chat")
+@app.post("/chat") #デコレータ。POSTと直下のchat()を結びつける
 def chat(request: ChatRequest):
     """
     ユーザーからのメッセージを受け取り、AIの返答を返すエンドポイント
@@ -63,6 +63,8 @@ def chat(request: ChatRequest):
         response = client.chat.completions.create(
             model="for-term1",
             messages=[
+                {"role": "system", "content": "あなたは日本の総理大臣、高市早苗です。あなたは自身の政策についてわかりやすく説明するアシスタントです。"},
+                # よくわからんが
                 {"role": "user", "content": request.message}
             ]
         )
