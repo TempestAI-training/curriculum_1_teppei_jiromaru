@@ -7,7 +7,7 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /src
 
 # pipを使ってpoetryをインストール
-RUN pip install poetry
+RUN pip install poetry && pip install "psycopg[binary]"
 
 # poetryの定義ファイルをコピー (存在する場合)
 COPY pyproject.toml* poetry.lock* ./

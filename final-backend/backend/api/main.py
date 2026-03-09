@@ -19,6 +19,8 @@ from dotenv import load_dotenv
 #corsの設定
 from fastapi.middleware.cors import CORSMiddleware
 
+from api.db_postgres import save_message 
+
 # === ここから追加： 通信の裏側をログに出力する設定 ===
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("httpx").setLevel(logging.DEBUG)
@@ -59,6 +61,7 @@ def chat(request: ChatRequest):
     ユーザーからのメッセージを受け取り、AIの返答を返すエンドポイント
     """
     try:
+        save_message(role="user", content=request.message)
         # OpenAI APIへのリクエスト
         response = client.chat.completions.create(
             model="for-term1",
@@ -71,6 +74,7 @@ def chat(request: ChatRequest):
         
         # AIからの返答内容を取得
         ai_message = response.choices[0].message.content
+        save_message(role="assistant", content=ai_message)
         
         return {"reply": ai_message}
 
