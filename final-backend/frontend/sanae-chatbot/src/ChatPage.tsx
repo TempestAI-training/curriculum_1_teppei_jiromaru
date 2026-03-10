@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useEffect } from "react";
+import { useRef } from "react";
 type ChatPageProps = {
   setIsVisible: (value: boolean) => void;
   // content: string;
@@ -19,6 +20,13 @@ export const ChatPage = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // auto scrolll
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   const send = async () => {
     if (!input) {
       return;
@@ -39,16 +47,51 @@ export const ChatPage = ({
         // FastAPI側の ChatRequest が期待している {"message": "..."} の形にする
         body: JSON.stringify({ message: currentInput }),
       });
-      //backendからのレスポンス
-      const data = await response.json();
-      // main.pyではreturn {"reply": ai_message}としているので、data.replyでアクセスできる
-
-      const botMessage: Message = {
-        text: data.reply,
-        sender: "bot",
-      };
+      // //backendからのレスポンス
+      // const data = await response.json();
+      // // main.pyではreturn {"reply": ai_message}としているので、data.replyでアクセスできる
+      //
+      // const botMessage: Message = {
+      //   text: data.reply,
+      //   sender: "bot",
+      // };
+      // setIsLoading(false);
+      // setMessages((prev) => [...prev, botMessage]);
       setIsLoading(false);
-      setMessages((prev) => [...prev, botMessage]);
+      // AI用の空っぽのメッセージを1つ画面に追加する（ここに文字を足していきます）
+      setMessages((prev) => [...prev, { text: "", sender: "bot" }]);
+
+      // 3. データを受け取る「パイプ（reader）」と「翻訳機（decoder）」を用意
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder("utf-8");
+
+      if (!reader) throw new Error("ストリームが読み込めません");
+
+      // 4. データが届き終わるまで、無限ループで受け取り続ける
+      while (true) {
+        // パイプから「次のデータの塊（chunk）」を受け取る
+        const { done, value } = await reader.read();
+
+        // AIがしゃべり終わったら（doneがtrueになったら）ループを抜ける
+        if (done) break;
+
+        // 届いた暗号みたいなバイナリデータを、読める日本語（文字列）に翻訳
+        const chunkText = decoder.decode(value, { stream: true });
+
+        // 5. 画面の「一番最後に追加したAIのメッセージ」に、今届いた文字を継ぎ足す！
+        setMessages((prev) => {
+          const newMessages = [...prev];
+          const lastIndex = newMessages.length - 1;
+
+          // 最後のメッセージの text に、新しく届いた chunkText を合体させる
+          newMessages[lastIndex] = {
+            ...newMessages[lastIndex], // 一度スプレッド構文ですべて展開
+            text: newMessages[lastIndex].text + chunkText, // textのところだけ上書き
+          };
+
+          return newMessages;
+        });
+      }
     } catch (error) {
       console.error(error);
       const errorMessage: Message = {
@@ -172,6 +215,7 @@ export const ChatPage = ({
               ))}
             </div>
             {isLoading && <div>高市さんが回答中...</div>}
+            <div ref={messagesEndRef} style={{ height: "0px" }}></div>
           </div>
 
           <div

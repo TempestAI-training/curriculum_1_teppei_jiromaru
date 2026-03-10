@@ -21,6 +21,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.db_postgres import get_messages, save_message 
 
+from fastapi.responses import StreamingResponse
+
 # === ここから追加： 通信の裏側をログに出力する設定 ===
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("httpx").setLevel(logging.DEBUG)
@@ -78,14 +80,31 @@ def chat(request: ChatRequest):
         # OpenAI APIへのリクエスト
         response = client.chat.completions.create(
             model="for-term1",
-            messages=messages    
+            messages=messages,
+            stream=True
         )
         
-        # AIからの返答内容を取得
-        ai_message = response.choices[0].message.content
-        save_message(role="assistant", content=ai_message)
-        
-        return {"reply": ai_message}
+        # # AIからの返答内容を取得
+        # ai_message = response.choices[0].message.content
+        # save_message(role="assistant", content=ai_message)
+        # 
+        # return {"reply": ai_message}
+        def generate():
+            full_ai_message = "" # DB保存用に、全文を記憶しておく箱
+
+            # OpenAIから届く細切れのデータ（chunk）をループで処理
+            for chunk in response:
+                # もし文字が含まれていたら
+                if len(chunk.choices)>0 and chunk.choices[0].delta.content is not None:
+                    text_chunk = chunk.choices[0].delta.content
+                    full_ai_message += text_chunk # 全文用の箱に文字を足す
+                    yield text_chunk # 👈 フロントエンドに文字を1文字〜数文字ずつ投げる！
+
+            # 5. ★全部送り終わった後に、完成した全文をDBに保存する！
+            save_message(role="assistant", content=full_ai_message)
+
+        # 6. StreamingResponse でジェネレーターを実行して返す
+        return StreamingResponse(generate(), media_type="text/event-stream")
 
     except Exception as e:
         # エラーが発生した場合の処理
