@@ -18,6 +18,7 @@ export const ChatPage = ({
 }: ChatPageProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const send = async () => {
     if (!input) {
       return;
@@ -28,6 +29,7 @@ export const ChatPage = ({
     const currentInput = input;
     setInput("");
     // bot
+    setIsLoading(true);
     try {
       const response = await fetch("http://localhost:8000/chat", {
         method: "POST",
@@ -45,6 +47,7 @@ export const ChatPage = ({
         text: data.reply,
         sender: "bot",
       };
+      setIsLoading(false);
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       console.error(error);
@@ -52,6 +55,7 @@ export const ChatPage = ({
         text: "===a communication error has occured===",
         sender: "bot",
       };
+      setIsLoading(false);
       setMessages((prev) => [...prev, errorMessage]);
     }
   };
@@ -148,7 +152,8 @@ export const ChatPage = ({
                     display: "flex",
                     justifyContent:
                       el.sender === "bot" ? "flex-star" : "flex-end",
-                    textAlign: el.sender === "bot" ? "left" : "right",
+                    // textAlign: el.sender === "bot" ? "left" : "right",
+                    textAlign: "left",
                   }}
                 >
                   <div
@@ -166,6 +171,7 @@ export const ChatPage = ({
                 </div>
               ))}
             </div>
+            {isLoading && <div>高市さんが回答中...</div>}
           </div>
 
           <div
