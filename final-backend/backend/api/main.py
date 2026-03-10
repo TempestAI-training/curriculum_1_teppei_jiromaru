@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 #corsの設定
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.db_postgres import save_message 
+from api.db_postgres import get_messages, save_message 
 
 # === ここから追加： 通信の裏側をログに出力する設定 ===
 logging.basicConfig(level=logging.INFO)
@@ -81,3 +81,10 @@ def chat(request: ChatRequest):
     except Exception as e:
         # エラーが発生した場合の処理
         return {"error": str(e)}
+
+chat_history_limit = 5
+
+@app.get("/chat/history")
+def get_chat_history():
+    messages = get_messages(chat_history_limit)
+    return {"history": messages}

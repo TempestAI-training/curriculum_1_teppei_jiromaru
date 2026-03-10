@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import { useEffect } from "react";
 type ChatPageProps = {
   setIsVisible: (value: boolean) => void;
   // content: string;
@@ -55,6 +55,46 @@ export const ChatPage = ({
       setMessages((prev) => [...prev, errorMessage]);
     }
   };
+  // try{
+  //     const response = await fetch("http://localhost:8000/chat/history", {
+  //       method: "GET",
+  //     });
+  //     //backendからのレスポンス
+  //     const data = await response.json();
+  //       data.history
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  useEffect(() => {
+    // useEffectの中では直接asyncを使えないので、中に関数を作って呼び出します
+    const fetchHistory = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/chat/history", {
+          method: "GET",
+        });
+
+        if (!response.ok) throw new Error("faild to get history");
+
+        const data = await response.json();
+
+        // 1. バックエンドのデータをフロントエンドの Message 型に変換する
+        // ※システムプロンプト（role: "system"）は画面に表示したくないので filter で除外します
+        const formattedHistory: Message[] = data.history
+          .filter((msg: any) => msg.role !== "system") // systemを除外
+          .map((msg: any) => ({
+            text: msg.content,
+            sender: msg.role === "user" ? "user" : "bot", // roleがuserならuser、それ以外(assistant)ならbot
+          }));
+
+        // 2. 変換したデータをReactのステートにセットして画面に表示！
+        setMessages(formattedHistory);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchHistory();
+  }, []); // 👈 この空の配列 [] が「最初の1回だけ実行する」という超重要な魔法です！
 
   return (
     <>
