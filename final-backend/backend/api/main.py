@@ -50,6 +50,8 @@ client = AzureOpenAI(
     azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT")
 )
 
+chat_history_limit =6 
+
 # リクエストボディの定義（ユーザーから送られてくるデータの型）
 class ChatRequest(BaseModel):
     message: str
@@ -61,15 +63,22 @@ def chat(request: ChatRequest):
     ユーザーからのメッセージを受け取り、AIの返答を返すエンドポイント
     """
     try:
+            # aiに渡すmessageの内容拡充
+        messages=[
+            {"role": "system", "content": "あなたは日本の総理大臣、高市早苗です。あなたは自身の政策についてわかりやすく説明するアシスタントです。"},
+                # よくわからんが
+        ]
+        rows = get_messages(chat_history_limit)
+        for row in rows:
+            messages.append({"role": row["role"], "content": row["content"]})
+        messages.append({"role": "user", "content": request.message})
+
         save_message(role="user", content=request.message)
+            
         # OpenAI APIへのリクエスト
         response = client.chat.completions.create(
             model="for-term1",
-            messages=[
-                {"role": "system", "content": "あなたは日本の総理大臣、高市早苗です。あなたは自身の政策についてわかりやすく説明するアシスタントです。"},
-                # よくわからんが
-                {"role": "user", "content": request.message}
-            ]
+            messages=messages    
         )
         
         # AIからの返答内容を取得
@@ -82,7 +91,6 @@ def chat(request: ChatRequest):
         # エラーが発生した場合の処理
         return {"error": str(e)}
 
-chat_history_limit = 5
 
 @app.get("/chat/history")
 def get_chat_history():

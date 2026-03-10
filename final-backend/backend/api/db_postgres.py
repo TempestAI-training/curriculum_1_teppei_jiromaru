@@ -25,10 +25,14 @@ def get_messages(limit: int=5):
             with conn.cursor() as cur:
                 # created_atはさすがにいらないかな？lineみたいに表示するなら必要だけど
                 sql = """
-                    SELECT content, role, created_at
-                    FROM messages
-                    ORDER BY created_at
-                    LIMIT %s
+                    SELECT content, role, created_at 
+                    FROM (
+                        SELECT content, role, created_at
+                        FROM messages
+                        ORDER BY created_at DESC
+                        LIMIT %s
+                    ) AS subquery
+                    ORDER BY created_at ASC
                 """
                 cur.execute(sql, (limit,))
                 rows = cur.fetchall()
