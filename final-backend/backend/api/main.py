@@ -49,7 +49,8 @@ app.add_middleware(
 client = AzureOpenAI(
     api_key=os.environ.get("OPENAI_API_KEY"),
     base_url=os.environ.get("OPENAI_BASE_URL"),
-    azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT")
+    # azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"),
+    api_version="2025-01-01-preview"
 )
 
 chat_history_limit =6 
