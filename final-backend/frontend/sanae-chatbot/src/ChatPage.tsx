@@ -39,14 +39,17 @@ export const ChatPage = ({
     // bot
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        "https://finalbackendj-cpb9cgcrfvgmfjgj.japanwest-01.azurewebsites.net/chat",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          // FastAPI側の ChatRequest が期待している {"message": "..."} の形にする
+          body: JSON.stringify({ message: currentInput }),
         },
-        // FastAPI側の ChatRequest が期待している {"message": "..."} の形にする
-        body: JSON.stringify({ message: currentInput }),
-      });
+      );
       // //backendからのレスポンス
       // const data = await response.json();
       // // main.pyではreturn {"reply": ai_message}としているので、data.replyでアクセスできる
@@ -116,9 +119,12 @@ export const ChatPage = ({
     // useEffectの中では直接asyncを使えないので、中に関数を作って呼び出します
     const fetchHistory = async () => {
       try {
-        const response = await fetch("http://localhost:8000/chat/history", {
-          method: "GET",
-        });
+        const response = await fetch(
+          "https://finalbackendj-cpb9cgcrfvgmfjgj.japanwest-01.azurewebsites.net/chat",
+          {
+            method: "GET",
+          },
+        );
 
         if (!response.ok) throw new Error("faild to get history");
 
