@@ -120,7 +120,7 @@ export const ChatPage = ({
     const fetchHistory = async () => {
       try {
         const response = await fetch(
-          "https://finalbackendj-cpb9cgcrfvgmfjgj.japanwest-01.azurewebsites.net/chat",
+          "https://finalbackendj-cpb9cgcrfvgmfjgj.japanwest-01.azurewebsites.net/chat/history",
           {
             method: "GET",
           },
