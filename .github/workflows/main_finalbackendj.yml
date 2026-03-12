@@ -70,7 +70,7 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           # app-name: 'finalbackend'
-          app-name: 'finalbackendj-cpb9cgcrfvgmfjgj'
+          app-name: 'finalbackendj'
           slot-name: 'Production'
           package: deploy
 
