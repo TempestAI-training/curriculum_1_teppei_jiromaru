@@ -37,7 +37,7 @@ app = FastAPI()
 # corsの設定
 app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:3000"],
+        allow_origins=["https://curriculum-1-teppei-jiromaru.vercel.app"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
